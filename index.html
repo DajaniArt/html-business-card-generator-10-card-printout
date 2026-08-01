@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Card Designer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        .app-header {
+            background: #16213e;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #0f3460;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .app-header h1 {
+            font-size: 16pt;
+            color: #d4a574;
+            font-family: Georgia, serif;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .header-actions button {
+            padding: 7px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 9pt;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .btn-save { background: #4a6a5e; color: white; }
+        .btn-save:hover { background: #5a7a6e; }
+        .btn-clear { background: #c0392b; color: white; }
+        .btn-clear:hover { background: #e74c3c; }
+        .btn-history { background: #2c3e50; color: white; border: 1px solid #4a6a5e !important; }
+        .btn-history:hover { background: #34495e; }
+        .btn-print { background: #c49a2c; color: #1a1a2e; }
+        .btn-print:hover { background: #d4aa3c; }
+        .btn-template { background: #0f3460; color: #d4a574; border: 1px solid #d4a574 !important; }
+        .btn-template:hover { background: #1a4a80; }
+        .btn-snapall { background: #8e44ad; color: white; }
+        .btn-snapall:hover { background: #9b59b6; }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            min-height: calc(100vh - 56px);
+        }
+
+        /* ===== EDITOR PANEL ===== */
+        .editor-panel {
+            background: #16213e;
+            padding: 15px;
+            overflow-y: auto;
+            max-height: calc(100vh - 56px);
+            border-right: 2px solid #0f3460;
+        }
+
+        .editor-section {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #1a1a2e;
+            border-radius: 8px;
+            border: 1px solid #0f3460;
+        }
+
+        .editor-section h3 {
+            font-size: 9pt;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #d4a574;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #0f3460;
+        }
+
+        .field-group {
+            margin-bottom: 8px;
+        }
+
+        .field-group label {
+            display: block;
+            font-size: 8pt;
+            color: #888;
+            margin-bottom: 3px;
+        }
+
+        .field-group input[type="text"],
+        .field-group input[type="url"],
+        .field-group textarea,
+        .field-group select {
+            width: 100%;
+            padding: 6px 8px;
+            background: #0f3460;
+            border: 1px solid #1a3a6e;
+            border-radius: 4px;
+            color: #eee;
+            font-size: 9pt;
+            font-family: inherit;
+        }
+
+        .field-group textarea {
+            resize: vertical;
+            min-height: 50px;
+        }
+
+        .field-group input:focus,
+        .field-group textarea:focus,
+        .field-group select:focus {
+            outline: none;
+            border-color: #d4a574;
+        }
+
+        .color-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .color-row label {
+            flex: 1;
+            font-size: 8pt;
+            color: #888;
+        }
+
+        .color-row input[type="color"] {
+            width: 30px;
+            height: 24px;
+            border: 1px solid #1a3a6e;
+            border-radius: 4px;
+            cursor: pointer;
+            background: none;
+            padding: 2px;
+        }
+
+        .color-row input[type="text"] {
+            width: 72px;
+            padding: 3px 5px;
+            background: #0f3460;
+            border: 1px solid #1a3a6e;
+            border-radius: 4px;
+            color: #eee;
+            font-size: 8pt;
+            font-family: monospace;
+        }
+
+        .side-toggle {
+            display: flex;
+            gap: 0;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .side-toggle button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 9pt;
+            transition: all 0.2s;
+            background: #0f3460;
+            color: #888;
+        }
+
+        .side-toggle button.active {
+            background: #4a6a5e;
+            color: white;
+        }
+
+        .layout-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .layout-option {
+            padding: 8px;
+            background: #0f3460;
+            border: 2px solid #1a3a6e;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 8pt;
+            color: #aaa;
+            transition: all 0.2s;
+        }
+
+        .layout-option:hover { border-color: #4a6a5e; }
+        .layout-option.active { border-color: #d4a574; color: #d4a574; }
+
+        .image-upload-area {
+            border: 2px dashed #1a3a6e;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .image-upload-area:hover { border-color: #4a6a5e; }
+        .image-upload-area.has-image { border-style: solid; border-color: #4a6a5e; }
+
+        .image-upload-area input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .image-upload-area .upload-text { font-size: 8pt; color: #888; }
+        .image-upload-area img { max-width: 100%; max-height: 60px; border-radius: 4px; }
+
+        .btn-remove-image {
+            margin-top: 6px;
+            padding: 3px 10px;
+            background: #c0392b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 8pt;
+        }
+
+        .range-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .range-row label { flex: 1; font-size: 8pt; color: #888; }
+        .range-row input[type="range"] { width: 90px; }
+        .range-row .range-value { font-size: 8pt; color: #d4a574; width: 32px; text-align: right; }
+
+        /* ===== PREVIEW PANEL ===== */
+        .preview-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            gap: 20px;
+        }
+
+        .preview-label {
+            font-size: 8pt;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #888;
+            margin-bottom: -12px;
+        }
+
+        .preview-wrapper {
+            position: relative;
+        }
+
+        /* The card canvas is always 3.5in x 2in internally */
+        .card-canvas {
+            width: 3.5in;
+            height: 2in;
+            position: relative;
+            overflow: hidden;
+            font-family: Georgia, 'Times New Roman', serif;
+            transform-origin: top left;
+        }
+
+        .preview-wrapper .card-canvas {
+            transform: scale(1.45);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            border-radius: 3px;
+        }
+
+        .preview-wrapper {
+            width: calc(3.5in * 1.45);
+            height: calc(2in * 1.45);
+        }
+
+        .card-canvas .card-bg {
+            position: absolute;
+            inset: 0;
+        }
+
+        .card-canvas .card-bg-image {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            z-index: 0;
+        }
+
+        .card-canvas .card-border-overlay {
+            position: absolute;
+            border-style: solid;
+            border-radius: 2px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Draggable elements */
+        .drag-element {
+            position: absolute;
+            cursor: move;
+            z-index: 5;
+            transition: box-shadow 0.15s;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        .drag-element:hover {
+            box-shadow: 0 0 0 1px rgba(212, 165, 116, 0.5);
+        }
+
+        .drag-element.dragging {
+            box-shadow: 0 0 0 2px #d4a574;
+            opacity: 0.9;
+            z-index: 10;
+        }
+
+        .drag-element.selected {
+            box-shadow: 0 0 0 1px #d4a574;
+        }
+
+        /* Element toolbar */
+        .element-toolbar {
+            display: none;
+            position: absolute;
+            top: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #16213e;
+            border: 1px solid #d4a574;
+            border-radius: 4px;
+            padding: 3px;
+            gap: 3px;
+            z-index: 20;
+            white-space: nowrap;
+        }
+
+        .drag-element.selected .element-toolbar {
+            display: flex;
+        }
+
+        .element-toolbar button {
+            padding: 2px 6px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 7pt;
+            font-weight: bold;
+        }
+
+        .tb-snap { background: #8e44ad; color: white; }
+        .tb-undo { background: #2c3e50; color: white; }
+
+        /* ===== HISTORY MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 550px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid #0f3460;
+        }
+
+        .modal h2 {
+            color: #d4a574;
+            margin-bottom: 12px;
+            font-family: Georgia, serif;
+            font-size: 14pt;
+        }
+
+        .history-list { display: flex; flex-direction: column; gap: 8px; }
+
+        .history-item {
+            background: #1a1a2e;
+            padding: 10px 14px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #0f3460;
+        }
+
+        .history-item .history-info { font-size: 9pt; color: #aaa; }
+        .history-item .history-info strong { color: #eee; display: block; margin-bottom: 2px; }
+        .history-item button { padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 8pt; font-weight: bold; }
+        .btn-restore { background: #4a6a5e; color: white; }
+        .btn-delete { background: #c0392b; color: white; margin-left: 4px; }
+
+        .modal-close { margin-top: 12px; padding: 8px 16px; background: #0f3460; color: #eee; border: none; border-radius: 6px; cursor: pointer; font-size: 9pt; }
+        .no-history { color: #666; font-style: italic; padding: 15px; text-align: center; }
+
+        /* ===== PRINT FIDELITY ===== */
+        .print-sheet { display: none; }
+
+        @media print {
+            body > *:not(.print-sheet) { display: none !important; }
+            .print-sheet { display: block !important; }
+            .print-page {
+                width: 8.5in;
+                height: 11in;
+                padding: 0.5in 0.75in;
+                display: grid;
+                grid-template-columns: 3.5in 3.5in;
+                grid-template-rows: repeat(5, 2in);
+                page-break-after: always;
+            }
+            .print-page .card-canvas {
+                transform: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+            }
+            .drag-element {
+                cursor: default !important;
+                box-shadow: none !important;
+            }
+            .drag-element .element-toolbar { display: none !important; }
+            @page { margin: 0; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+        }
+
+        .drag-hint {
+            font-size: 7pt;
+            color: #666;
+            text-align: center;
+            margin-top: -8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1000px) {
+            .main-container { grid-template-columns: 1fr; }
+            .editor-panel { max-height: none; }
+            .preview-panel { padding: 15px; }
+            .preview-wrapper .card-canvas { transform: scale(1.1); }
+            .preview-wrapper { width: calc(3.5in * 1.1); height: calc(2in * 1.1); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-header">
+    <h1>Business Card Designer</h1>
+    <div class="header-actions">
+        <button class="btn-template" onclick="loadTemplate()">Load Template</button>
+        <button class="btn-history" onclick="showHistory()">Previous Designs</button>
+        <button class="btn-snapall" onclick="snapAllBack()">Snap All Back</button>
+        <button class="btn-clear" onclick="clearDesign()">Clear</button>
+        <button class="btn-save" onclick="saveDesign()">Save</button>
+        <button class="btn-print" onclick="printCards()">Print 10 Cards</button>
+    </div>
+</div>
+
+<div class="main-container">
+    <div class="editor-panel">
+        <div class="side-toggle">
+            <button id="btn-front" class="active" onclick="switchSide('front')">Front</button>
+            <button id="btn-back" onclick="switchSide('back')">Back</button>
+        </div>
+
+        <!-- FRONT EDITOR -->
+        <div id="editor-front">
+            <div class="editor-section">
+                <h3>Layout</h3>
+                <div class="layout-options">
+                    <div class="layout-option active" data-layout="center" data-side="front" onclick="setLayout(this)">Centered</div>
+                    <div class="layout-option" data-layout="left" data-side="front" onclick="setLayout(this)">Left</div>
+                    <div class="layout-option" data-layout="right" data-side="front" onclick="setLayout(this)">Right</div>
+                    <div class="layout-option" data-layout="split" data-side="front" onclick="setLayout(this)">Split</div>
+                </div>
+            </div>
+
+            <div class="editor-section">
+                <h3>Text Content</h3>
+                <div class="field-group"><label>Brand Name</label><input type="text" id="front-brand" placeholder="YOUR BRAND" oninput="updatePreview()"></div>
+                <div class="field-group"><label>Name & Title</label><input type="text" id="front-name" placeholder="Your Name, Title" oninput="updatePreview()"></div>
+                <div class="field-group"><label>Subtitle</label><input type="text" id="front-subtitle" placeholder="License, credentials" oninput="updatePreview()"></div>
+                <div class="field-group"><label>Service (italic)</label><input type="text" id="front-service" placeholder="What you do" oninput="updatePreview()"></div>
+                <div class="field-group"><label>Locations</label><input type="text" id="front-locations" placeholder="City • City" oninput="updatePreview()"></div>
+                <div class="field-group"><label>Contact (one per line)</label><textarea id="front-contact" placeholder="Phone&#10;Email&#10;Website" oninput="updatePreview()"></textarea></div>
+            </div>
+
+            <div class="editor-section">
+                <h3>Colors</h3>
+                <div class="color-row"><label>Background</label><input type="color" id="front-bg-color" value="#f9f6f2" oninput="syncColor(this)"><input type="text" id="front-bg-color-text" value="#f9f6f2" oninput="syncColorText(this)"></div>
+                <div class="color-row"><label>Brand Name</label><input type="color" id="front-brand-color" value="#2c2c2c" oninput="syncColor(this)"><input type="text" id="front-brand-color-text" value="#2c2c2c" oninput="syncColorText(this)"></div>
+                <div class="color-row"><label>Body Text</label><input type="color" id="front-text-color" value="#2c2c2c" oninput="syncColor(this)"><input type="text" id="front-text-color-text" value="#2c2c2c" oninput="syncColorText(this)"></div>
+                <div class="color-row"><label>Accent Lines</label><input type="color" id="front-accent-color" value="#d4a574" oninput="syncColor(this)"><input type="text" id="front-accent-color-text" value="#d4a574" oninput="syncColorText(this)"></div>
+                <div class="color-row"><label>Border</label><input type="color" id="front-border-color" value="#d4a574" oninput="syncColor(this)"><input type="text" id="front-border-color-text" value="#d4a574" oninput="syncColorText(this)"></div>
+            </div>
+
+            <div class="editor-section">
+                <h3>Sizing</h3>
+                <div class="range-row"><label>Brand Size</label><input type="range" id="front-brand-size" min="8" max="36" value="22" oninput="updatePreview()"><span class="range-value" id="front-brand-size-val">22pt</span></div>
+                <div class="range-row"><label>Body Size</label><input type="range" id="front-body-size" min="5" max="16" value="9" oninput="updatePreview()"><span class="range-value" id="front-body-size-val">9pt</span></div>
+                <div class="range-row"><label>Border Width</label><input type="range" id="front-border-width" min="0" max="4" value="1.5" step="0.5" oninput="updatePreview()"><span class="range-value" id="front-border-width-val">1.5px</span></div>
+                <div class="range-row"><label>Border Inset</label><input type="range" id="front-border-inset" min="0" max="15" value="6" oninput="updatePreview()"><span class="range-value" id="front-border-inset-val">6px</span></div>
+                <div class="range-row"><label>Letter Spacing</label><input type="range" id="front-brand-spacing" min="0" max="16" value="10" oninput="updatePreview()"><span class="range-value" id="front-brand-spacing-val">10px</span></div>
+            </div>
+
+            <div class="editor-section">
+                <h3>Background Image</h3>
+                <div class="image-upload-area" id="front-image-area">
+                    <input type="file" accept="image/*" onchange="handleImage(event, 'front')">
+                    <div class="upload-text" id="front-upload-text">Click or drag image</div>
+                    <img id="front-image-preview" style="display:none;">
+                </div>
+                <button class="btn-remove-image" id="front-remove-image" style="display:none;" onclick="removeImage('front')">Remove</button>
+            </div>
+        </div>
+
+        <!-- BACK EDITOR -->
+        <div id="editor-back" style="display:none;">
+            <div class="editor-section">
+                <h3>Layout</h3>
+                <div class="layout-options">
+                    <div class="layout-option" data-layout="center" data-side="back" onclick="setLayout(this)">Centered</div>
+                    <div class="layout-option active" data-layout="left" data-side="back" onclick="setLayout(this)">Left</div>
+                    <div class="layout-option" data-layout="right" data-side="back" onclick="setLayout(this)">Right</div>
+                    <div class="layout-option" data-layout="split" data-side="back" onclick="setLayout(this)">Split</div>
+                </div>
+            </div>
+
+            <div class="editor-section">
+                <h3>Text Content</h3>
+                <div class="field-group"><label>Tagline</label><input type="text" id="back-tagline" placeholder="Your tagline" oninput="updatePreview()"></div>
+                <div class="field-group"><label>Section Label</label><input type="text" id="back-label" placeholder="LABEL" oninput="updatePreview()"></div>
+                <div class="field-group"><label>Body (one per line)</label><textarea id="back-body" placeholder="Line 1&#10;Line 2" oninput="updatePreview()"></textarea></div>
+                <div class="field-group"><label>Footer</label><input type="text" id="back-footer" placeholder="website.com" oninput="updatePreview()"></div>
+            </div>
+
+            <div class="editor-section">
+                <h3>Colors</h3>
+                <div class="color-row"><label>Background</label><input type="color" id="back-bg-color" value="#f9f6f2" oninput="syncColor(this)"><input type="text" id="back-bg-color-text" value="#f9f6f2" oninput="syncColorText(this)"></div>
+                <div class="color-row"><label>Tagline</label><input type="color" id="back-tagline-color" value="#c49a2c" oninput="syncColor(this)"><input type="text" id="back-tagline-color-text" value="#c49a2c" oninput="syncColorText(this)"></div>
+                <div class="color-row"><label>Body Text</label><input type="color" id="back-text-color" value="#4a6a5e" oninput="syncColor(this)"><input type="text" id="back-text-color-text" value="#4a6a5e" oninput="syncColorText(this)"></div>
+                <div class="color-row"><label>Label</label><input type="color" id="back-label-color" value="#4a6a5e" oninput="syncColor(this)"><input type="text" id="back-label-color-text" value="#4a6a5e" oninput="syncColorText(this)"></div>
+            </div>
+
+            <div class="editor-section">
+                <h3>Sizing</h3>
+                <div class="range-row"><label>Tagline Size</label><input type="range" id="back-tagline-size" min="8" max="26" value="18" oninput="updatePreview()"><span class="range-value" id="back-tagline-size-val">18pt</span></div>
+                <div class="range-row"><label>Body Size</label><input type="range" id="back-body-size" min="6" max="18" value="11" oninput="updatePreview()"><span class="range-value" id="back-body-size-val">11pt</span></div>
+                <div class="range-row"><label>Label Size</label><input type="range" id="back-label-size" min="5" max="12" value="7" oninput="updatePreview()"><span class="range-value" id="back-label-size-val">7pt</span></div>
+            </div>
+
+            <div class="editor-section">
+                <h3>QR Code</h3>
+                <div class="field-group"><label>URL (empty = no QR)</label><input type="url" id="back-qr-url" placeholder="https://..." oninput="updatePreview()"></div>
+                <div class="color-row"><label>QR Color</label><input type="color" id="back-qr-color" value="#4a6a5e" oninput="syncColor(this)"><input type="text" id="back-qr-color-text" value="#4a6a5e" oninput="syncColorText(this)"></div>
+                <div class="field-group"><label>QR Label</label><input type="text" id="back-qr-label" placeholder="Label" oninput="updatePreview()"></div>
+                <div class="range-row"><label>QR Size</label><input type="range" id="back-qr-size" min="30" max="90" value="55" oninput="updatePreview()"><span class="range-value" id="back-qr-size-val">55px</span></div>
+            </div>
+
+            <div class="editor-section">
+                <h3>Background Image</h3>
+                <div class="image-upload-area" id="back-image-area">
+                    <input type="file" accept="image/*" onchange="handleImage(event, 'back')">
+                    <div class="upload-text" id="back-upload-text">Click or drag image</div>
+                    <img id="back-image-preview" style="display:none;">
+                </div>
+                <button class="btn-remove-image" id="back-remove-image" style="display:none;" onclick="removeImage('back')">Remove</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="preview-panel">
+        <span class="preview-label">Front (drag elements to reposition)</span>
+        <div class="preview-wrapper">
+            <div class="card-canvas" id="canvas-front"></div>
+        </div>
+        <span class="preview-label">Back</span>
+        <div class="preview-wrapper">
+            <div class="card-canvas" id="canvas-back"></div>
+        </div>
+        <div class="drag-hint">Click element to select • Drag to move • Use toolbar to snap back or undo</div>
+    </div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div class="modal-overlay" id="history-modal">
+    <div class="modal">
+        <h2>Previous Designs</h2>
+        <div class="history-list" id="history-list"></div>
+        <button class="modal-close" onclick="closeHistory()">Close</button>
+    </div>
+</div>
+
+<!-- PRINT SHEET -->
+<div class="print-sheet" id="print-sheet"></div>
+
+<script>
+// ===== QR CODE GENERATOR =====
+const QRCode=(function(){function generateQR(text,color){if(!text)return'';const modules=encode(text);if(!modules)return'';const size=modules.length;const quiet=2;const total=size+quiet*2;let svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} ${total}" width="100%" height="100%">`;svg+=`<rect width="${total}" height="${total}" fill="white"/>`;for(let y=0;y<size;y++)for(let x=0;x<size;x++)if(modules[y][x])svg+=`<rect x="${x+quiet}" y="${y+quiet}" width="1" height="1" fill="${color}"/>`;svg+='</svg>';return svg;}function encode(text){const data=[];for(let i=0;i<text.length;i++)data.push(text.charCodeAt(i));let version=1;const caps=[0,17,32,53,78,106,134,154,192,230,271];for(let v=1;v<=10;v++)if(data.length<=caps[v]){version=v;break;}const size=version*4+17;const modules=Array.from({length:size},()=>Array(size).fill(false));const reserved=Array.from({length:size},()=>Array(size).fill(false));placeFinder(modules,reserved,0,0);placeFinder(modules,reserved,size-7,0);placeFinder(modules,reserved,0,size-7);for(let i=8;i<size-8;i++){modules[6][i]=i%2===0;modules[i][6]=i%2===0;reserved[6][i]=true;reserved[i][6]=true;}if(version>=2){const pos=getAlignPos(version);for(let ay of pos)for(let ax of pos){if(reserved[ay]&&reserved[ay][ax])continue;placeAlign(modules,reserved,ax,ay);}}for(let i=0;i<8;i++){reserved[8][i]=true;reserved[8][size-1-i]=true;reserved[i][8]=true;reserved[size-1-i][8]=true;}reserved[8][8]=true;modules[size-8][8]=true;reserved[size-8][8]=true;const encoded=encodeData(data,version);placeData(modules,reserved,encoded,size);applyMask(modules,reserved,size);placeFormat(modules,size);return modules;}function placeFinder(m,r,row,col){for(let rr=-1;rr<=7;rr++)for(let cc=-1;cc<=7;cc++){const y=row+rr,x=col+cc;if(y<0||x<0||y>=m.length||x>=m.length)continue;const outer=rr===0||rr===6||cc===0||cc===6;const inner=rr>=2&&rr<=4&&cc>=2&&cc<=4;const border=rr===-1||rr===7||cc===-1||cc===7;m[y][x]=!border&&(outer||inner);r[y][x]=true;}}function placeAlign(m,r,cx,cy){for(let rr=-2;rr<=2;rr++)for(let cc=-2;cc<=2;cc++){const y=cy+rr,x=cx+cc;if(y<0||x<0||y>=m.length||x>=m.length||r[y][x])continue;m[y][x]=Math.abs(rr)===2||Math.abs(cc)===2||(rr===0&&cc===0);r[y][x]=true;}}function getAlignPos(v){if(v===1)return[];const pos=[6];const last=v*4+10;const cnt=Math.floor(v/7)+2;const step=Math.ceil((last-6)/(cnt-1));for(let i=1;i<cnt;i++)pos.push(6+i*step);pos[pos.length-1]=last;return pos;}function encodeData(data,v){const total=getCap(v)*8;const bits=[];bits.push(0,1,0,0);const cb=v<=9?8:16;for(let i=cb-1;i>=0;i--)bits.push((data.length>>i)&1);for(const b of data)for(let i=7;i>=0;i--)bits.push((b>>i)&1);for(let i=0;i<4&&bits.length<total;i++)bits.push(0);while(bits.length%8!==0&&bits.length<total)bits.push(0);const pad=[0xEC,0x11];let pi=0;while(bits.length<total){const p=pad[pi%2];for(let i=7;i>=0;i--)bits.push((p>>i)&1);pi++;}return bits.slice(0,total);}function getCap(v){return[0,19,34,55,80,108,136,156,194,232,274][v]||19;}function placeData(m,r,bits,size){let bi=0,up=true;for(let col=size-1;col>=1;col-=2){if(col===6)col=5;const rows=up?Array.from({length:size},(_,i)=>size-1-i):Array.from({length:size},(_,i)=>i);for(const row of rows)for(let c=0;c<2;c++){const cc=col-c;if(cc<0||r[row][cc])continue;if(bi<bits.length){m[row][cc]=bits[bi]===1;bi++;}}up=!up;}}function applyMask(m,r,size){for(let rr=0;rr<size;rr++)for(let cc=0;cc<size;cc++){if(r[rr][cc])continue;if((rr+cc)%2===0)m[rr][cc]=!m[rr][cc];}}function placeFormat(m,size){const f=[1,1,1,0,1,1,1,1,1,0,0,0,1,0,0];for(let i=0;i<6;i++)m[8][i]=f[i]===1;m[8][7]=f[6]===1;m[8][8]=f[7]===1;m[7][8]=f[8]===1;for(let i=9;i<15;i++)m[14-i][8]=f[i]===1;for(let i=0;i<8;i++)m[size-1-i][8]=f[i]===1;for(let i=8;i<15;i++)m[8][size-15+i]=f[i]===1;}return{generate:generateQR};})();
+
+// ===== STATE =====
+let currentSide = 'front';
+let state = getBlankState();
+let images = { front: null, back: null };
+let selectedElement = null;
+
+function getBlankState() {
+    return {
+        front: {
+            layout:'center', brand:'', name:'', subtitle:'', service:'', locations:'', contact:'',
+            bgColor:'#ffffff', brandColor:'#2c2c2c', textColor:'#2c2c2c', accentColor:'#cccccc', borderColor:'#cccccc',
+            brandSize:22, bodySize:9, borderWidth:0, borderInset:6, brandSpacing:8,
+            positions: getDefaultPositions('front', 'center')
+        },
+        back: {
+            layout:'center', tagline:'', label:'', body:'', footer:'',
+            bgColor:'#ffffff', taglineColor:'#333333', textColor:'#333333', labelColor:'#333333',
+            taglineSize:18, bodySize:11, labelSize:7,
+            qrUrl:'', qrColor:'#000000', qrLabel:'', qrSize:55,
+            positions: getDefaultPositions('back', 'center')
+        }
+    };
+}
+
+function getDefaultPositions(side, layout) {
+    if (side === 'front') {
+        const cx = layout === 'left' ? 25 : layout === 'right' ? 75 : 50;
+        return {
+            brand: { x: cx, y: 18 },
+            line1: { x: cx, y: 30 },
+            name: { x: cx, y: 38 },
+            subtitle: { x: cx, y: 46 },
+            service: { x: cx, y: 55 },
+            line2: { x: cx, y: 63 },
+            locations: { x: cx, y: 70 },
+            contact: { x: cx, y: 83 }
+        };
+    } else {
+        const cx = layout === 'left' ? 25 : layout === 'right' ? 75 : 50;
+        return {
+            tagline: { x: cx, y: 22 },
+            label: { x: cx, y: 38 },
+            body: { x: cx, y: 55 },
+            footer: { x: cx, y: 80 },
+            qr: { x: 85, y: 65 }
+        };
+    }
+}
+
+function getDajaniTemplate() {
+    return {
+        front: {
+            layout:'center', brand:'DAJANI', name:'David King, LMT', subtitle:'License #MT-2026-0096',
+            service:'Mobile Therapeutic Massage', locations:'Albuquerque \u2022 Rio Rancho \u2022 Corrales',
+            contact:'(505) 331-4477\nking@dajani.art\ndajani.art',
+            bgColor:'#f9f6f2', brandColor:'#2c2c2c', textColor:'#2c2c2c', accentColor:'#d4a574', borderColor:'#d4a574',
+            brandSize:22, bodySize:9, borderWidth:1.5, borderInset:6, brandSpacing:10,
+            positions: getDefaultPositions('front', 'center')
+        },
+        back: {
+            layout:'left', tagline:'Feel Like a King.', label:'YOUR FIRST SESSION',
+            body:'120 minutes \u2014 $200\n90 minutes \u2014 $160', footer:'dajani.art',
+            bgColor:'#f9f6f2', taglineColor:'#c49a2c', textColor:'#4a6a5e', labelColor:'#4a6a5e',
+            taglineSize:18, bodySize:11, labelSize:7,
+            qrUrl:'https://dajani.art/royal-decrees/', qrColor:'#4a6a5e', qrLabel:'Royal Decrees', qrSize:55,
+            positions: getDefaultPositions('back', 'left')
+        }
+    };
+}
+
+// ===== POSITION HISTORY (for undo) =====
+let positionHistory = { front: {}, back: {} };
+
+function savePositionForUndo(side, key) {
+    if (!positionHistory[side][key]) positionHistory[side][key] = [];
+    positionHistory[side][key].push({ ...state[side].positions[key] });
+    if (positionHistory[side][key].length > 20) positionHistory[side][key].shift();
+}
+
+function undoPosition(side, key) {
+    const hist = positionHistory[side][key];
+    if (hist && hist.length > 0) {
+        state[side].positions[key] = hist.pop();
+        updatePreview();
+    }
+}
+
+function snapBack(side, key) {
+    savePositionForUndo(side, key);
+    const defaults = getDefaultPositions(side, state[side].layout);
+    state[side].positions[key] = { ...defaults[key] };
+    updatePreview();
+}
+
+function snapAllBack() {
+    ['front', 'back'].forEach(side => {
+        const defaults = getDefaultPositions(side, state[side].layout);
+        Object.keys(defaults).forEach(key => {
+            if (state[side].positions[key]) {
+                savePositionForUndo(side, key);
+                state[side].positions[key] = { ...defaults[key] };
+            }
+        });
+    });
+    updatePreview();
+}
+
+// ===== DRAG SYSTEM =====
+let dragState = { active: false, element: null, side: '', key: '', startX: 0, startY: 0, startPosX: 0, startPosY: 0 };
+
+function initDrag(e, side, key) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const canvas = document.getElementById(`canvas-${side}`);
+    const rect = canvas.getBoundingClientRect();
+    const scale = rect.width / canvas.offsetWidth;
+    
+    savePositionForUndo(side, key);
+    
+    dragState = {
+        active: true,
+        side: side,
+        key: key,
+        startX: e.clientX || e.touches[0].clientX,
+        startY: e.clientY || e.touches[0].clientY,
+        startPosX: state[side].positions[key].x,
+        startPosY: state[side].positions[key].y,
+        canvasRect: rect,
+        canvasW: rect.width,
+        canvasH: rect.height
+    };
+    
+    // Select element
+    deselectAll();
+    const el = e.currentTarget;
+    el.classList.add('dragging', 'selected');
+    selectedElement = { side, key, el };
+}
+
+function onMouseMove(e) {
+    if (!dragState.active) return;
+    e.preventDefault();
+    
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+    
+    const dx = clientX - dragState.startX;
+    const dy = clientY - dragState.startY;
+    
+    const pctX = (dx / dragState.canvasW) * 100;
+    const pctY = (dy / dragState.canvasH) * 100;
+    
+    let newX = dragState.startPosX + pctX;
+    let newY = dragState.startPosY + pctY;
+    
+    // Clamp within bounds
+    newX = Math.max(5, Math.min(95, newX));
+    newY = Math.max(5, Math.min(95, newY));
+    
+    state[dragState.side].positions[dragState.key] = { x: newX, y: newY };
+    updatePreview();
+}
+
+function onMouseUp(e) {
+    if (!dragState.active) return;
+    dragState.active = false;
+    document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+}
+
+document.addEventListener('mousemove', onMouseMove);
+document.addEventListener('mouseup', onMouseUp);
+document.addEventListener('touchmove', onMouseMove, { passive: false });
+document.addEventListener('touchend', onMouseUp);
+
+function deselectAll() {
+    document.querySelectorAll('.drag-element.selected').forEach(el => el.classList.remove('selected'));
+    selectedElement = null;
+}
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.drag-element') && !e.target.closest('.element-toolbar')) {
+        deselectAll();
+    }
+});
+
+// ===== INIT =====
+window.addEventListener('DOMContentLoaded', () => {
+    loadState();
+    populateFields();
+    updatePreview();
+});
+
+setInterval(() => {
+    collectState();
+    localStorage.setItem('cardDesigner_current', JSON.stringify(state));
+}, 2000);
+
+// ===== STATE LOAD/SAVE =====
+function loadState() {
+    const saved = localStorage.getItem('cardDesigner_current');
+    if (saved) {
+        try {
+            const parsed = JSON.parse(saved);
+            state = parsed;
+            if (!state.front.positions) state.front.positions = getDefaultPositions('front', state.front.layout);
+            if (!state.back.positions) state.back.positions = getDefaultPositions('back', state.back.layout);
+        } catch(e) { state = getBlankState(); }
+    } else {
+        state = getDajaniTemplate();
+        localStorage.setItem('cardDesigner_current', JSON.stringify(state));
+    }
+    const fi = localStorage.getItem('cardDesigner_frontImage');
+    const bi = localStorage.getItem('cardDesigner_backImage');
+    if (fi) images.front = fi;
+    if (bi) images.back = bi;
+}
+
+function collectState() {
+    state.front.brand = document.getElementById('front-brand').value;
+    state.front.name = document.getElementById('front-name').value;
+    state.front.subtitle = document.getElementById('front-subtitle').value;
+    state.front.service = document.getElementById('front-service').value;
+    state.front.locations = document.getElementById('front-locations').value;
+    state.front.contact = document.getElementById('front-contact').value;
+    state.front.bgColor = document.getElementById('front-bg-color').value;
+    state.front.brandColor = document.getElementById('front-brand-color').value;
+    state.front.textColor = document.getElementById('front-text-color').value;
+    state.front.accentColor = document.getElementById('front-accent-color').value;
+    state.front.borderColor = document.getElementById('front-border-color').value;
+    state.front.brandSize = parseInt(document.getElementById('front-brand-size').value);
+    state.front.bodySize = parseInt(document.getElementById('front-body-size').value);
+    state.front.borderWidth = parseFloat(document.getElementById('front-border-width').value);
+    state.front.borderInset = parseInt(document.getElementById('front-border-inset').value);
+    state.front.brandSpacing = parseInt(document.getElementById('front-brand-spacing').value);
+    
+    state.back.tagline = document.getElementById('back-tagline').value;
+    state.back.label = document.getElementById('back-label').value;
+    state.back.body = document.getElementById('back-body').value;
+    state.back.footer = document.getElementById('back-footer').value;
+    state.back.bgColor = document.getElementById('back-bg-color').value;
+    state.back.taglineColor = document.getElementById('back-tagline-color').value;
+    state.back.textColor = document.getElementById('back-text-color').value;
+    state.back.labelColor = document.getElementById('back-label-color').value;
+    state.back.taglineSize = parseInt(document.getElementById('back-tagline-size').value);
+    state.back.bodySize = parseInt(document.getElementById('back-body-size').value);
+    state.back.labelSize = parseInt(document.getElementById('back-label-size').value);
+    state.back.qrUrl = document.getElementById('back-qr-url').value;
+    state.back.qrColor = document.getElementById('back-qr-color').value;
+    state.back.qrLabel = document.getElementById('back-qr-label').value;
+    state.back.qrSize = parseInt(document.getElementById('back-qr-size').value);
+}
+
+function populateFields() {
+    document.getElementById('front-brand').value = state.front.brand || '';
+    document.getElementById('front-name').value = state.front.name || '';
+    document.getElementById('front-subtitle').value = state.front.subtitle || '';
+    document.getElementById('front-service').value = state.front.service || '';
+    document.getElementById('front-locations').value = state.front.locations || '';
+    document.getElementById('front-contact').value = state.front.contact || '';
+    document.getElementById('front-bg-color').value = state.front.bgColor;
+    document.getElementById('front-bg-color-text').value = state.front.bgColor;
+    document.getElementById('front-brand-color').value = state.front.brandColor;
+    document.getElementById('front-brand-color-text').value = state.front.brandColor;
+    document.getElementById('front-text-color').value = state.front.textColor;
+    document.getElementById('front-text-color-text').value = state.front.textColor;
+    document.getElementById('front-accent-color').value = state.front.accentColor;
+    document.getElementById('front-accent-color-text').value = state.front.accentColor;
+    document.getElementById('front-border-color').value = state.front.borderColor;
+    document.getElementById('front-border-color-text').value = state.front.borderColor;
+    document.getElementById('front-brand-size').value = state.front.brandSize;
+    document.getElementById('front-body-size').value = state.front.bodySize;
+    document.getElementById('front-border-width').value = state.front.borderWidth;
+    document.getElementById('front-border-inset').value = state.front.borderInset;
+    document.getElementById('front-brand-spacing').value = state.front.brandSpacing;
+    
+    document.getElementById('back-tagline').value = state.back.tagline || '';
+    document.getElementById('back-label').value = state.back.label || '';
+    document.getElementById('back-body').value = state.back.body || '';
+    document.getElementById('back-footer').value = state.back.footer || '';
+    document.getElementById('back-bg-color').value = state.back.bgColor;
+    document.getElementById('back-bg-color-text').value = state.back.bgColor;
+    document.getElementById('back-tagline-color').value = state.back.taglineColor;
+    document.getElementById('back-tagline-color-text').value = state.back.taglineColor;
+    document.getElementById('back-text-color').value = state.back.textColor;
+    document.getElementById('back-text-color-text').value = state.back.textColor;
+    document.getElementById('back-label-color').value = state.back.labelColor;
+    document.getElementById('back-label-color-text').value = state.back.labelColor;
+    document.getElementById('back-tagline-size').value = state.back.taglineSize;
+    document.getElementById('back-body-size').value = state.back.bodySize;
+    document.getElementById('back-label-size').value = state.back.labelSize;
+    document.getElementById('back-qr-url').value = state.back.qrUrl || '';
+    document.getElementById('back-qr-color').value = state.back.qrColor;
+    document.getElementById('back-qr-color-text').value = state.back.qrColor;
+    document.getElementById('back-qr-label').value = state.back.qrLabel || '';
+    document.getElementById('back-qr-size').value = state.back.qrSize;
+    
+    document.querySelectorAll('.layout-option').forEach(el => {
+        el.classList.remove('active');
+        if (state[el.dataset.side].layout === el.dataset.layout) el.classList.add('active');
+    });
+    
+    if (images.front) {
+        document.getElementById('front-image-preview').src = images.front;
+        document.getElementById('front-image-preview').style.display = 'block';
+        document.getElementById('front-upload-text').style.display = 'none';
+        document.getElementById('front-remove-image').style.display = 'inline-block';
+        document.getElementById('front-image-area').classList.add('has-image');
+    }
+    if (images.back) {
+        document.getElementById('back-image-preview').src = images.back;
+        document.getElementById('back-image-preview').style.display = 'block';
+        document.getElementById('back-upload-text').style.display = 'none';
+        document.getElementById('back-remove-image').style.display = 'inline-block';
+        document.getElementById('back-image-area').classList.add('has-image');
+    }
+}
+
+// ===== UI =====
+function switchSide(side) {
+    currentSide = side;
+    document.getElementById('btn-front').classList.toggle('active', side === 'front');
+    document.getElementById('btn-back').classList.toggle('active', side === 'back');
+    document.getElementById('editor-front').style.display = side === 'front' ? 'block' : 'none';
+    document.getElementById('editor-back').style.display = side === 'back' ? 'block' : 'none';
+}
+
+function setLayout(el) {
+    const side = el.dataset.side;
+    state[side].layout = el.dataset.layout;
+    // Reset positions to new layout defaults
+    state[side].positions = getDefaultPositions(side, el.dataset.layout);
+    document.querySelectorAll(`.layout-option[data-side="${side}"]`).forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+    updatePreview();
+}
+
+function syncColor(input) {
+    const t = document.getElementById(input.id + '-text');
+    if (t) t.value = input.value;
+    updatePreview();
+}
+
+function syncColorText(input) {
+    const c = document.getElementById(input.id.replace('-text', ''));
+    if (c && /^#[0-9a-fA-F]{6}$/.test(input.value)) c.value = input.value;
+    updatePreview();
+}
+
+function handleImage(event, side) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        images[side] = e.target.result;
+        document.getElementById(`${side}-image-preview`).src = e.target.result;
+        document.getElementById(`${side}-image-preview`).style.display = 'block';
+        document.getElementById(`${side}-upload-text`).style.display = 'none';
+        document.getElementById(`${side}-remove-image`).style.display = 'inline-block';
+        document.getElementById(`${side}-image-area`).classList.add('has-image');
+        try { localStorage.setItem(`cardDesigner_${side}Image`, e.target.result); } catch(err) {}
+        updatePreview();
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeImage(side) {
+    images[side] = null;
+    document.getElementById(`${side}-image-preview`).style.display = 'none';
+    document.getElementById(`${side}-upload-text`).style.display = 'block';
+    document.getElementById(`${side}-remove-image`).style.display = 'none';
+    document.getElementById(`${side}-image-area`).classList.remove('has-image');
+    localStorage.removeItem(`cardDesigner_${side}Image`);
+    updatePreview();
+}
+
+// ===== CARD RENDERER (Single source of truth for preview AND print) =====
+function renderCard(side, interactive) {
+    if (side === 'front') return renderFrontCard(interactive);
+    return renderBackCard(interactive);
+}
+
+function makeDraggable(side, key, interactive) {
+    if (!interactive) return '';
+    return `onmousedown="initDrag(event,'${side}','${key}')" ontouchstart="initDrag(event,'${side}','${key}')"`;
+}
+
+function makeToolbar(side, key, interactive) {
+    if (!interactive) return '';
+    return `<div class="element-toolbar"><button class="tb-snap" onclick="event.stopPropagation();snapBack('${side}','${key}')">Snap</button><button class="tb-undo" onclick="event.stopPropagation();undoPosition('${side}','${key}')">Undo</button></div>`;
+}
+
+function renderFrontCard(interactive) {
+    const s = state.front;
+    const p = s.positions;
+    const contactLines = (s.contact || '').split('\n').filter(l => l).join('<br>');
+    
+    let html = `<div style="position:absolute;inset:0;background:${s.bgColor};"></div>`;
+    
+    if (images.front) {
+        html += `<div style="position:absolute;inset:0;background-image:url(${images.front});background-size:cover;background-position:center;z-index:0;"></div>`;
+    }
+    
+    if (s.borderWidth > 0) {
+        html += `<div style="position:absolute;top:${s.borderInset}pt;left:${s.borderInset}pt;right:${s.borderInset}pt;bottom:${s.borderInset}pt;border:${s.borderWidth}pt solid ${s.borderColor};border-radius:1px;z-index:1;pointer-events:none;"></div>`;
+    }
+    
+    // Brand
+    if (s.brand) {
+        html += `<div class="drag-element" ${makeDraggable('front','brand',interactive)} style="left:${p.brand.x}%;top:${p.brand.y}%;transform:translate(-50%,-50%);font-size:${s.brandSize}pt;letter-spacing:${s.brandSpacing}pt;color:${s.brandColor};white-space:nowrap;">${makeToolbar('front','brand',interactive)}${s.brand}</div>`;
+    }
+    
+    // Line 1
+    html += `<div class="drag-element" ${makeDraggable('front','line1',interactive)} style="left:${p.line1.x}%;top:${p.line1.y}%;transform:translate(-50%,-50%);width:65%;height:1pt;background:${s.accentColor};">${makeToolbar('front','line1',interactive)}</div>`;
+    
+    // Name
+    if (s.name) {
+        html += `<div class="drag-element" ${makeDraggable('front','name',interactive)} style="left:${p.name.x}%;top:${p.name.y}%;transform:translate(-50%,-50%);font-size:${s.bodySize}pt;color:${s.textColor};white-space:nowrap;">${makeToolbar('front','name',interactive)}${s.name}</div>`;
+    }
+    
+    // Subtitle
+    if (s.subtitle) {
+        html += `<div class="drag-element" ${makeDraggable('front','subtitle',interactive)} style="left:${p.subtitle.x}%;top:${p.subtitle.y}%;transform:translate(-50%,-50%);font-size:${Math.max(5,s.bodySize-2)}pt;color:${s.textColor};opacity:0.7;white-space:nowrap;">${makeToolbar('front','subtitle',interactive)}${s.subtitle}</div>`;
+    }
+    
+    // Service
+    if (s.service) {
+        html += `<div class="drag-element" ${makeDraggable('front','service',interactive)} style="left:${p.service.x}%;top:${p.service.y}%;transform:translate(-50%,-50%);font-size:${s.bodySize}pt;font-style:italic;color:${s.textColor};white-space:nowrap;">${makeToolbar('front','service',interactive)}${s.service}</div>`;
+    }
+    
+    // Line 2
+    html += `<div class="drag-element" ${makeDraggable('front','line2',interactive)} style="left:${p.line2.x}%;top:${p.line2.y}%;transform:translate(-50%,-50%);width:45%;height:1pt;background:${s.accentColor};">${makeToolbar('front','line2',interactive)}</div>`;
+    
+    // Locations
+    if (s.locations) {
+        html += `<div class="drag-element" ${makeDraggable('front','locations',interactive)} style="left:${p.locations.x}%;top:${p.locations.y}%;transform:translate(-50%,-50%);font-size:${Math.max(5,s.bodySize-1)}pt;color:${s.textColor};white-space:nowrap;">${makeToolbar('front','locations',interactive)}${s.locations}</div>`;
+    }
+    
+    // Contact
+    if (s.contact) {
+        html += `<div class="drag-element" ${makeDraggable('front','contact',interactive)} style="left:${p.contact.x}%;top:${p.contact.y}%;transform:translate(-50%,-50%);font-size:${Math.max(5,s.bodySize-1)}pt;color:${s.textColor};line-height:1.5;text-align:center;">${makeToolbar('front','contact',interactive)}${contactLines}</div>`;
+    }
+    
+    return html;
+}
+
+function renderBackCard(interactive) {
+    const s = state.back;
+    const p = s.positions;
+    const bodyLines = (s.body || '').split('\n').filter(l => l).join('<br>');
+    
+    let html = `<div style="position:absolute;inset:0;background:${s.bgColor};"></div>`;
+    
+    if (images.back) {
+        html += `<div style="position:absolute;inset:0;background-image:url(${images.back});background-size:cover;background-position:center;z-index:0;"></div>`;
+    }
+    
+    // Tagline
+    if (s.tagline) {
+        html += `<div class="drag-element" ${makeDraggable('back','tagline',interactive)} style="left:${p.tagline.x}%;top:${p.tagline.y}%;transform:translate(-50%,-50%);font-size:${s.taglineSize}pt;font-style:italic;color:${s.taglineColor};white-space:nowrap;">${makeToolbar('back','tagline',interactive)}${s.tagline}</div>`;
+    }
+    
+    // Label
+    if (s.label) {
+        html += `<div class="drag-element" ${makeDraggable('back','label',interactive)} style="left:${p.label.x}%;top:${p.label.y}%;transform:translate(-50%,-50%);font-size:${s.labelSize}pt;color:${s.labelColor};letter-spacing:2pt;text-transform:uppercase;font-weight:bold;white-space:nowrap;">${makeToolbar('back','label',interactive)}\u2014\u2014 ${s.label} \u2014\u2014</div>`;
+    }
+    
+    // Body
+    if (s.body) {
+        html += `<div class="drag-element" ${makeDraggable('back','body',interactive)} style="left:${p.body.x}%;top:${p.body.y}%;transform:translate(-50%,-50%);font-size:${s.bodySize}pt;color:${s.textColor};line-height:1.9;text-align:center;">${makeToolbar('back','body',interactive)}${bodyLines}</div>`;
+    }
+    
+    // Footer
+    if (s.footer) {
+        html += `<div class="drag-element" ${makeDraggable('back','footer',interactive)} style="left:${p.footer.x}%;top:${p.footer.y}%;transform:translate(-50%,-50%);font-size:${Math.max(5,s.bodySize-2)}pt;color:${s.textColor};opacity:0.8;">${makeToolbar('back','footer',interactive)}${s.footer}</div>`;
+    }
+    
+    // QR
+    if (s.qrUrl) {
+        const qrSvg = QRCode.generate(s.qrUrl, s.qrColor);
+        html += `<div class="drag-element" ${makeDraggable('back','qr',interactive)} style="left:${p.qr.x}%;top:${p.qr.y}%;transform:translate(-50%,-50%);width:${s.qrSize}pt;display:flex;flex-direction:column;align-items:center;">${makeToolbar('back','qr',interactive)}<div style="width:${s.qrSize}pt;height:${s.qrSize}pt;">${qrSvg}</div>${s.qrLabel ? `<div style="font-size:5pt;color:${s.labelColor};margin-top:1pt;white-space:nowrap;">${s.qrLabel}</div>` : ''}</div>`;
+    }
+    
+    return html;
+}
+
+// ===== PREVIEW =====
+function updatePreview() {
+    collectState();
+    
+    // Update range displays
+    document.getElementById('front-brand-size-val').textContent = state.front.brandSize + 'pt';
+    document.getElementById('front-body-size-val').textContent = state.front.bodySize + 'pt';
+    document.getElementById('front-border-width-val').textContent = state.front.borderWidth + 'px';
+    document.getElementById('front-border-inset-val').textContent = state.front.borderInset + 'px';
+    document.getElementById('front-brand-spacing-val').textContent = state.front.brandSpacing + 'px';
+    document.getElementById('back-tagline-size-val').textContent = state.back.taglineSize + 'pt';
+    document.getElementById('back-body-size-val').textContent = state.back.bodySize + 'pt';
+    document.getElementById('back-label-size-val').textContent = state.back.labelSize + 'pt';
+    document.getElementById('back-qr-size-val').textContent = state.back.qrSize + 'px';
+    
+    document.getElementById('canvas-front').innerHTML = renderCard('front', true);
+    document.getElementById('canvas-back').innerHTML = renderCard('back', true);
+}
+
+// ===== PRINT (uses exact same render - guaranteed match) =====
+function printCards() {
+    collectState();
+    const sheet = document.getElementById('print-sheet');
+    
+    // Generate card HTML (non-interactive = no drag handlers or toolbars)
+    const frontHTML = renderCard('front', false);
+    const backHTML = renderCard('back', false);
+    
+    let html = '<div class="print-page">';
+    for (let i = 0; i < 10; i++) {
+        html += `<div class="card-canvas" style="width:3.5in;height:2in;position:relative;overflow:hidden;font-family:Georgia,'Times New Roman',serif;">${frontHTML}</div>`;
+    }
+    html += '</div><div class="print-page">';
+    for (let i = 0; i < 10; i++) {
+        html += `<div class="card-canvas" style="width:3.5in;height:2in;position:relative;overflow:hidden;font-family:Georgia,'Times New Roman',serif;">${backHTML}</div>`;
+    }
+    html += '</div>';
+    
+    sheet.innerHTML = html;
+    setTimeout(() => window.print(), 200);
+}
+
+// ===== SAVE / CLEAR / HISTORY =====
+function saveDesign() {
+    collectState();
+    localStorage.setItem('cardDesigner_current', JSON.stringify(state));
+    const btn = document.querySelector('.btn-save');
+    btn.textContent = 'Saved!'; btn.style.background = '#27ae60';
+    setTimeout(() => { btn.textContent = 'Save'; btn.style.background = ''; }, 1500);
+}
+
+function clearDesign() {
+    if (!confirm('Clear design? Current saved to history.')) return;
+    collectState();
+    const history = JSON.parse(localStorage.getItem('cardDesigner_history') || '[]');
+    history.unshift({ date: new Date().toLocaleString(), name: state.front.brand || 'Untitled', state: JSON.parse(JSON.stringify(state)) });
+    if (history.length > 20) history.pop();
+    localStorage.setItem('cardDesigner_history', JSON.stringify(history));
+    
+    state = getBlankState();
+    images = { front: null, back: null };
+    positionHistory = { front: {}, back: {} };
+    localStorage.removeItem('cardDesigner_frontImage');
+    localStorage.removeItem('cardDesigner_backImage');
+    localStorage.setItem('cardDesigner_current', JSON.stringify(state));
+    ['front','back'].forEach(side => {
+        document.getElementById(`${side}-image-preview`).style.display = 'none';
+        document.getElementById(`${side}-upload-text`).style.display = 'block';
+        document.getElementById(`${side}-remove-image`).style.display = 'none';
+        document.getElementById(`${side}-image-area`).classList.remove('has-image');
+    });
+    populateFields();
+    updatePreview();
+}
+
+function loadTemplate() {
+    if (state.front.brand && !confirm('Load template? Current design saved to history.')) return;
+    if (state.front.brand || state.back.tagline) {
+        collectState();
+        const history = JSON.parse(localStorage.getItem('cardDesigner_history') || '[]');
+        history.unshift({ date: new Date().toLocaleString(), name: state.front.brand || 'Untitled', state: JSON.parse(JSON.stringify(state)) });
+        if (history.length > 20) history.pop();
+        localStorage.setItem('cardDesigner_history', JSON.stringify(history));
+    }
+    state = getDajaniTemplate();
+    localStorage.setItem('cardDesigner_current', JSON.stringify(state));
+    populateFields();
+    updatePreview();
+}
+
+function showHistory() {
+    const history = JSON.parse(localStorage.getItem('cardDesigner_history') || '[]');
+    const list = document.getElementById('history-list');
+    if (history.length === 0) {
+        list.innerHTML = '<div class="no-history">No previous designs. "Clear" archives current design.</div>';
+    } else {
+        list.innerHTML = history.map((item, idx) => `<div class="history-item"><div class="history-info"><strong>${item.name}</strong>${item.date}</div><div><button class="btn-restore" onclick="restoreDesign(${idx})">Restore</button><button class="btn-delete" onclick="deleteHistory(${idx})">Delete</button></div></div>`).join('');
+    }
+    document.getElementById('history-modal').classList.add('active');
+}
+
+function closeHistory() { document.getElementById('history-modal').classList.remove('active'); }
+
+function restoreDesign(idx) {
+    const history = JSON.parse(localStorage.getItem('cardDesigner_history') || '[]');
+    if (history[idx]) {
+        state = history[idx].state;
+        if (!state.front.positions) state.front.positions = getDefaultPositions('front', state.front.layout);
+        if (!state.back.positions) state.back.positions = getDefaultPositions('back', state.back.layout);
+        localStorage.setItem('cardDesigner_current', JSON.stringify(state));
+        populateFields();
+        updatePreview();
+        closeHistory();
+    }
+}
+
+function deleteHistory(idx) {
+    const history = JSON.parse(localStorage.getItem('cardDesigner_history') || '[]');
+    history.splice(idx, 1);
+    localStorage.setItem('cardDesigner_history', JSON.stringify(history));
+    showHistory();
+}
+</script>
+</body>
+</html>
