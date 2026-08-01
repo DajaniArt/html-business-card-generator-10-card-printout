@@ -19,7 +19,7 @@ A free, offline, single-file business card designer that runs entirely in your b
 
 ## 🚀 Use It Now
 
-**[Open Card Designer →](https://github.com/DajaniArt/html-business-card-generator-10-card-printout/deployments/github-pages)**
+**[Open Card Designer →] [(https://dajaniart.github.io/html-business-card-generator-10-card-printout/)]**
 
 Or download `index.html` and open it locally. Works without internet.
 
